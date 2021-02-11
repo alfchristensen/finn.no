@@ -16,46 +16,46 @@ regex_description = r'(?:Beskrivelse</h2>[\n][\s]*)([\s\S]*)(?:Spesifikasjoner)'
 regex_salestype = r'(?:Salgsform</dt>[\s]*<dd>)([ \S]*)(?:</dd>[\n])'
 regex_year = r'(?:<dt>1. gang registrert</dt>[\s]*<dd>[\d]{2}.[\d]{2}.)([\d]{4})(?:</dd>[\n])'
 regex_color = r'(?:<dt>Farge</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
+regex_horsepower = r'(?:<dt>Effekt</dt>[\s]*<dd>)([\d]*)(?: Hk</dd>[\n])'
+regex_seats = r'(?:<dt>Antall seter</dt>[\s]*<dd>)([\d])(?:</dd>[\n])'
+regex_taxclass = r'(?:<dt>Avgiftsklasse</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
+regex_registration = r'(?:<dt>Reg\.nr\.</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
+regex_chassisnumber = r'(?:<dt>Chassis nr\. \(VIN\)</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
 
 # Getting ad IDs for each match
 list_of_ids = re.findall(regex_get_ad_ids, finn_string)
+
+# Function for retrieving regex results
+def retrieve_value(regex, ad_html):
+    try:
+        value = re.findall(regex, ad_html)[0]
+    except IndexError:
+        value = 'unable to retrieve value'
+    return value
 
 # Iterating over the pages, gathering information of interest
 for finn_id in list_of_ids:
     print(finn_id)
     ad_html = requests.get(f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}').content.decode('utf8')
+    #vd_html = requests.get(f'')
 
     # Retrieving values from web page
-    try:
-        price = re.findall(regex_price, ad_html)[0]
-    except IndexError:
-        price = 'price not found'
-    try:
-        kilometers = re.findall(regex_kilometers, ad_html)[0]
-    except IndexError:
-        kilometers = 'kilometers not found'
-    try:
-        gearbox = re.findall(regex_gearbox, ad_html)[0]
-    except IndexError:
-        gearbox = 'gearbox not found'
-    if re.search(regex_service, ad_html):
-        service = True
-    else:
-        service = False
-    try:
-        description = BeautifulSoup(re.findall(regex_description, ad_html, )[0], "html5").text
-    except IndexError:
-        description = 'could not retrieve description'
-    try:
-        salestype = re.findall(regex_salestype, ad_html)[0]
-    except IndexError:
-        salestype = 'sales type could not be retrieved'
-    try:
-        year = re.findall(regex_year, ad_html)[0]
-    except IndexError:
-        year = 'could not retrieve year'
-    try:
-        color = re.findall(regex_color, ad_html)[0]
-    except IndexError:
-        color = 'could not retrieve color'
+    price = retrieve_value(regex_price, ad_html)
+    kilometers = retrieve_value(regex_kilometers, ad_html)
+    gearbox = retrieve_value(regex_gearbox, ad_html)
+    salestype = retrieve_value(regex_salestype, ad_html)
+    year = retrieve_value(regex_year, ad_html)
+    color = retrieve_value(regex_color, ad_html)
+    horsepower = retrieve_value(regex_horsepower, ad_html)
+    seats = retrieve_value(regex_seats, ad_html)
+    taxclass = retrieve_value(regex_taxclass, ad_html)
+    registration = retrieve_value(regex_registration, ad_html)
+    chassisnumber = retrieve_value(regex_chassisnumber, ad_html)
+    service = bool(re.search(regex_service, ad_html))
+    description = BeautifulSoup(re.findall(regex_description, ad_html)[0], "html5").text
+
+    temp = kilometers.replace(' ', '')
+
+    print(registration, temp)
+    
     
