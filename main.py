@@ -9,7 +9,8 @@ finn_string = requests.get('https://www.finn.no/car/used/search.html?condition=1
 # Regex expressions
 regex_get_ad_ids = r'(?:<div aria-owns="ads__unit__content__title)([\d]{9})'
 regex_price = r'(?:Totalpris[\s\S]*class=\"u-t3\">)([\d]{3}[\s][\d]{3})(?:[\s]kr</span>)'
-regex_kilometers = r'(?:<div>Kilometer</div>[\s\S]*<div class=\"u-strong\">)([\d]{3}[\s][\d]{3})(?:[\s]km</div>)'
+#regex_kilometers = r'(?:<div>Kilometer</div>[\s\S]*<div class=\"u-strong\">)([\d]{3}[\s][\d]{3})(?:[\s]km</div>)'
+regex_kilometers = r'(?:<div>Kilometer<\/div>[\s]*<div class=\"u-strong\">)([\d]{3})(?:[\s])([\d]{3})(?:[\s]km<\/div>)'
 regex_gearbox = r'(?:<div>Girkasse</div>[\s\S]*<div class=\"u-strong\">)(Automat|Manuell)(?:</div>)'
 regex_service = r'Bilens serviceprogram er fulgt. Det er tatt servicer på bilen i henhold til fabrikkens retningslinjer.'
 regex_description = r'(?:Beskrivelse</h2>[\n][\s]*)([\s\S]*)(?:Spesifikasjoner)'
@@ -21,41 +22,51 @@ regex_seats = r'(?:<dt>Antall seter</dt>[\s]*<dd>)([\d])(?:</dd>[\n])'
 regex_taxclass = r'(?:<dt>Avgiftsklasse</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
 regex_registration = r'(?:<dt>Reg\.nr\.</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
 regex_chassisnumber = r'(?:<dt>Chassis nr\. \(VIN\)</dt>[\s]*<dd>)([\S]*)(?:</dd>[\n])'
+regex_listprice = r'(?:valuation-price dealer-price\">)([\d]{3})(?:[\s])([\d]{3})(?:[\s]kr<\/div>)'
 
 # Getting ad IDs for each match
 list_of_ids = re.findall(regex_get_ad_ids, finn_string)
 
 # Function for retrieving regex results
-def retrieve_value(regex, ad_html):
+def retrieve_value(regex, html_ad):
     try:
-        value = re.findall(regex, ad_html)[0]
+        value = re.findall(regex, html_ad)[0]
     except IndexError:
         value = 'unable to retrieve value'
     return value
 
+def get_list_price(regnr, kilometers):
+    html_price = requests.get(f'https://www.kvdnorge.no/bilvardering?regnr={regnr}&distance={kilometers}').content.decode('utf8')
+    #print(html_price)
+    #listprice = retrieve_value(regex_listprice, html_price)
+    #return listprice
+
+
 # Iterating over the pages, gathering information of interest
 for finn_id in list_of_ids:
     print(finn_id)
-    ad_html = requests.get(f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}').content.decode('utf8')
+    html_ad = requests.get(f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}').content.decode('utf8')
     #vd_html = requests.get(f'')
 
     # Retrieving values from web page
-    price = retrieve_value(regex_price, ad_html)
-    kilometers = retrieve_value(regex_kilometers, ad_html)
-    gearbox = retrieve_value(regex_gearbox, ad_html)
-    salestype = retrieve_value(regex_salestype, ad_html)
-    year = retrieve_value(regex_year, ad_html)
-    color = retrieve_value(regex_color, ad_html)
-    horsepower = retrieve_value(regex_horsepower, ad_html)
-    seats = retrieve_value(regex_seats, ad_html)
-    taxclass = retrieve_value(regex_taxclass, ad_html)
-    registration = retrieve_value(regex_registration, ad_html)
-    chassisnumber = retrieve_value(regex_chassisnumber, ad_html)
-    service = bool(re.search(regex_service, ad_html))
-    description = BeautifulSoup(re.findall(regex_description, ad_html)[0], "html5").text
+    price = retrieve_value(regex_price, html_ad)
+    kilometers = str(retrieve_value(regex_kilometers, html_ad)[0]) + str(retrieve_value(regex_kilometers, html_ad)[1])
+    gearbox = retrieve_value(regex_gearbox, html_ad)
+    salestype = retrieve_value(regex_salestype, html_ad)
+    year = retrieve_value(regex_year, html_ad)
+    color = retrieve_value(regex_color, html_ad)
+    horsepower = retrieve_value(regex_horsepower, html_ad)
+    seats = retrieve_value(regex_seats, html_ad)
+    taxclass = retrieve_value(regex_taxclass, html_ad)
+    registration = retrieve_value(regex_registration, html_ad)
+    chassisnumber = retrieve_value(regex_chassisnumber, html_ad)
+    #listprice = 
+    get_list_price(registration, kilometers)
 
-    temp = kilometers.replace(' ', '')
+    service = bool(re.search(regex_service, html_ad))
+    description = BeautifulSoup(re.findall(regex_description, html_ad)[0], "html5").text
 
-    print(registration, temp)
+
+    print(registration, chassisnumber, kilometers, service)
     
     
