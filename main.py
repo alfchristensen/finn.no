@@ -3,13 +3,13 @@ import urllib.request
 import re
 import csv
 from bs4 import BeautifulSoup
+import time
 
-finn_string = requests.get('https://www.finn.no/car/used/search.html?condition=1&mileage_to=280000&model=1.813.1397&price_to=280000&sort=PUBLISHED_DESC&year_from=2007').content.decode('utf8')
+finn_string = requests.get('https://www.finn.no/car/used/search.html?mileage_to=300000&model=1.813.1397&price_to=280000&registration_class=1&sort=PRICE_ASC&stored-id=46543826&year_from=2003').content.decode('utf8')
 
 # Regex expressions
 regex_get_ad_ids = r'(?:<div aria-owns="ads__unit__content__title)([\d]{9})'
 regex_price = r'(?:Totalpris[\s\S]*class=\"u-t3\">)([\d]{3}[\s][\d]{3})(?:[\s]kr</span>)'
-#regex_kilometers = r'(?:<div>Kilometer</div>[\s\S]*<div class=\"u-strong\">)([\d]{3}[\s][\d]{3})(?:[\s]km</div>)'
 regex_kilometers = r'(?:<div>Kilometer<\/div>[\s]*<div class=\"u-strong\">)([\d]{3})(?:[\s])([\d]{3})(?:[\s]km<\/div>)'
 regex_gearbox = r'(?:<div>Girkasse</div>[\s\S]*<div class=\"u-strong\">)(Automat|Manuell)(?:</div>)'
 regex_service = r'Bilens serviceprogram er fulgt. Det er tatt servicer på bilen i henhold til fabrikkens retningslinjer.'
@@ -32,41 +32,48 @@ def retrieve_value(regex, html_ad):
     try:
         value = re.findall(regex, html_ad)[0]
     except IndexError:
-        value = 'unable to retrieve value'
+        value = False
     return value
 
-def get_list_price(regnr, kilometers):
-    html_price = requests.get(f'https://www.kvdnorge.no/bilvardering?regnr={regnr}&distance={kilometers}').content.decode('utf8')
-    #print(html_price)
-    #listprice = retrieve_value(regex_listprice, html_price)
-    #return listprice
+# CSV file
+with open('cars.csv', "wb") as csv_file:
+    writer = csv.writer(csv_file, delimiter=';')
+    #for line in data:
+        #writer.writerow(line)
 
+    # Iterating over the pages, gathering information of interest
+    for finn_id in list_of_ids:
 
-# Iterating over the pages, gathering information of interest
-for finn_id in list_of_ids:
-    print(finn_id)
-    html_ad = requests.get(f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}').content.decode('utf8')
-    #vd_html = requests.get(f'')
+        time.sleep(5)
 
-    # Retrieving values from web page
-    price = retrieve_value(regex_price, html_ad)
-    kilometers = str(retrieve_value(regex_kilometers, html_ad)[0]) + str(retrieve_value(regex_kilometers, html_ad)[1])
-    gearbox = retrieve_value(regex_gearbox, html_ad)
-    salestype = retrieve_value(regex_salestype, html_ad)
-    year = retrieve_value(regex_year, html_ad)
-    color = retrieve_value(regex_color, html_ad)
-    horsepower = retrieve_value(regex_horsepower, html_ad)
-    seats = retrieve_value(regex_seats, html_ad)
-    taxclass = retrieve_value(regex_taxclass, html_ad)
-    registration = retrieve_value(regex_registration, html_ad)
-    chassisnumber = retrieve_value(regex_chassisnumber, html_ad)
-    #listprice = 
-    get_list_price(registration, kilometers)
+        html_ad = requests.get(f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}').content.decode('utf8')
 
-    service = bool(re.search(regex_service, html_ad))
-    description = BeautifulSoup(re.findall(regex_description, html_ad)[0], "html5").text
+        # Retrieving values from web page
+        price = retrieve_value(regex_price, html_ad)
+        kilometers = str(retrieve_value(regex_kilometers, html_ad)[0]) + str(retrieve_value(regex_kilometers, html_ad)[1])
+        gearbox = retrieve_value(regex_gearbox, html_ad)
+        salestype = retrieve_value(regex_salestype, html_ad)
+        year = retrieve_value(regex_year, html_ad)
+        color = retrieve_value(regex_color, html_ad)
+        horsepower = retrieve_value(regex_horsepower, html_ad)
+        seats = retrieve_value(regex_seats, html_ad)
+        taxclass = retrieve_value(regex_taxclass, html_ad)
+        registration = retrieve_value(regex_registration, html_ad)
+        chassisnumber = retrieve_value(regex_chassisnumber, html_ad)
 
+        # Special cases
+        service = bool(re.search(regex_service, html_ad))
+        try:
+            description = BeautifulSoup(re.findall(regex_description, html_ad)[0], "html5").text
+        except:
+            description = ''
+        link_listprice = f'https://www.kvdnorge.no/bilvardering?regnr={registration}&distance={kilometers}' if registration else ''
 
-    print(registration, chassisnumber, kilometers, service)
-    
-    
+        # Print for verification during execution
+        print(registration, chassisnumber, service, kilometers, year, price, horsepower, seats, color, taxclass, gearbox, salestype, link_listprice)#, description)
+
+        # Add row to CSV file
+        line = [registration, chassisnumber, service, kilometers, year, price, horsepower, seats, color, taxclass, gearbox, salestype, link_listprice, description]
+        writer.write(line)
+        
+        
