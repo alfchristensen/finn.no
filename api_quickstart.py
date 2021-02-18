@@ -1,4 +1,5 @@
 from __future__ import print_function
+from authenticate import gdocs
 import pickle
 import os.path
 from googleapiclient.discovery import build
@@ -12,9 +13,12 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 SAMPLE_SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
 SAMPLE_RANGE_NAME = 'Class Data!A2:E'
 
+auth = gdocs(SCOPES)
+
 def main():
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
+    """
     """
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
@@ -34,6 +38,9 @@ def main():
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
+    """
+
+    creds = auth.authenticate()
 
     service = build('sheets', 'v4', credentials=creds)
 

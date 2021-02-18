@@ -41,8 +41,34 @@ class gdocs:
             }
         }
         spreadsheet = service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
-        #print('Spreadsheet ID: {0}'.format(spreadsheet.get('spreadsheetId')))
         return spreadsheet['spreadsheetId']
 
+    def read_sheet(self, service, SHEET_ID, cell_range):
+        #sheet = service.spreadsheets()
+        result = service.spreadsheets().values().get(spreadsheetId=SHEET_ID, range=cell_range).execute() 
+        values = result.get('values', [])
+        return values
+
+    def append_sheet(self, service, SHEET_ID):
+        pass
+        request = service.spreadsheets().values().append(spreadsheetId=SHEET_ID, body={'UF29221', 'JTEBZ29J800101448', 'FALSE', 290000,	2006, 190000, 166, 8, 'Sølv', 'Personbil', 'Automat', 'Bruktbil til salgs', 'https://www.kvdnorge.no/bilvardering?regnr=UF29221&distance=290000'})
+        # range=range_, valueInputOption=value_input_option, insertDataOption=insert_data_option,
+        response = request.execute()
+
+
     def update_sheet(self, service, SHEET_ID):
+
+        sheet = service.spreadsheets()
+        result = sheet.values().get(spreadsheetId=SHEET_ID, range='Sheet1!A1:A100').execute() 
+        values = result.get('values', [])
+
+        if not values:
+            print('No data found.')
+        else:
+            print('Registration:')
+            for row in values:
+                print(row)
+                # Print columns A and E, which correspond to indices 0 and 4.
+                #print('%s, %s' % (row[0], row[4]))
+
         return ''
