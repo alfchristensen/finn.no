@@ -50,10 +50,13 @@ class gdocs:
         return values
 
     def append_sheet(self, service, SHEET_ID):
-        pass
-        request = service.spreadsheets().values().append(spreadsheetId=SHEET_ID, body={'UF29221', 'JTEBZ29J800101448', 'FALSE', 290000,	2006, 190000, 166, 8, 'Sølv', 'Personbil', 'Automat', 'Bruktbil til salgs', 'https://www.kvdnorge.no/bilvardering?regnr=UF29221&distance=290000'})
-        # range=range_, valueInputOption=value_input_option, insertDataOption=insert_data_option,
-        response = request.execute()
+        values = ['UF29221', 'JTEBZ29J800101448', 'FALSE', 290000, 2006, 190000, 166, 8, 'Sølv', 'Personbil', 'Automat', 'Bruktbil til salgs', 'https://www.kvdnorge.no/bilvardering?regnr=UF29221&distance=290000']
+        response = service.spreadsheets().values().append(spreadsheetId=SHEET_ID, 
+                                                        range='Sheet1!A7:M7', 
+                                                        valueInputOption='USER_ENTERED', 
+                                                        insertDataOption='INSERT_ROWS', 
+                                                        body={'values': [values]}).execute()
+        print(response)
 
 
     def update_sheet(self, service, SHEET_ID):
