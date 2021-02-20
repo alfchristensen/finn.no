@@ -44,18 +44,13 @@ class gdocs:
         return spreadsheet['spreadsheetId']
 
     def read_sheet(self, service, SHEET_ID, cell_range):
-        #sheet = service.spreadsheets()
         result = service.spreadsheets().values().get(spreadsheetId=SHEET_ID, range=cell_range).execute() 
         values = result.get('values', [])
         return values
 
-    def append_sheet(self, service, SHEET_ID):
-        values = ['UF29221', 'JTEBZ29J800101448', 'FALSE', 290000, 2006, 190000, 166, 8, 'Sølv', 'Personbil', 'Automat', 'Bruktbil til salgs', 'https://www.kvdnorge.no/bilvardering?regnr=UF29221&distance=290000']
-        response = service.spreadsheets().values().append(spreadsheetId=SHEET_ID, 
-                                                        range='Sheet1!A7:M7', 
-                                                        valueInputOption='USER_ENTERED', 
-                                                        insertDataOption='INSERT_ROWS', 
-                                                        body={'values': [values]}).execute()
+    def append_sheet(self, service, SHEET_ID, values):
+        
+        response = service.spreadsheets().values().append(spreadsheetId=SHEET_ID, range='Sheet1!A1:M1', valueInputOption='USER_ENTERED', insertDataOption='INSERT_ROWS', body={'values': [values]}).execute()
         print(response)
 
 
