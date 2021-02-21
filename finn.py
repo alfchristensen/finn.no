@@ -35,7 +35,6 @@ def get_car_details(finn_search):
 
     # Defining list to hold results
     car_list = []
-    #car_list.append(['registration', 'chassisnumber', 'service', 'kilometers', 'year', 'price', 'horsepower', 'seats', 'color', 'taxclass', 'gearbox', 'salestype', 'link_listprice', 'description'])
     
     # Getting list of ad IDs for each match
     finn_string = requests.get(finn_search).content.decode('utf8')
@@ -45,7 +44,7 @@ def get_car_details(finn_search):
     for finn_id in list_of_ids:
 
         # Sleeping thread to avoid finn rejecting requests
-        time.sleep(2)
+        time.sleep(1)
 
         # Loading web page
         html_ad = requests.get(f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}').content.decode('utf8')
@@ -69,13 +68,10 @@ def get_car_details(finn_search):
         #    description = BeautifulSoup(re.findall(regex_description, html_ad)[0], "html5").text
         #except:
         #    description = ''
-        link_listprice = f'https://www.kvdnorge.no/bilvardering?regnr={registration}&distance={kilometers}' if registration else ''
+        #link_listprice = f'https://www.kvdnorge.no/bilvardering?regnr={registration}&distance={kilometers}' if registration else ''
 
         # Add results to list
-        car_list.append([registration, chassisnumber, service, kilometers, year, price, horsepower, seats, color, taxclass, gearbox, salestype, link_listprice, f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}'])
-
-        # Print for verification during execution
-        #print(registration, chassisnumber, service, kilometers, year, price, horsepower, seats, color, taxclass, gearbox, salestype, link_listprice, description)
+        car_list.append([registration, chassisnumber, service, kilometers, year, price, horsepower, seats, color, taxclass, gearbox, salestype, 0, f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}'])
 
     # Return result
     return car_list

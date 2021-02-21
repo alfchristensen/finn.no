@@ -1,4 +1,5 @@
 import finn
+import data_assembly
 from gdocs import gdocs
 
 # Variables
@@ -13,10 +14,13 @@ existing_chassis = []
 # initialize objects
 gdocs = gdocs(SCOPES)
 service = gdocs.authenticate()
-#"""
+
 # Get details from finn.no on each car matching the search
-car_details = finn.get_car_details(FINN_SEARCH)
-    
+#car_details = finn.get_car_details(FINN_SEARCH)
+#car_details = 
+data_assembly.generate_datasets(FINN_SEARCH)
+
+"""
 # Retrieve existing data if sheet ID is supplied. If not, create a new spreadsheet 
 if SHEET_ID:
     # Obtain key data from existing spreadsheet
@@ -51,8 +55,12 @@ for car in car_details:
     else:
         # append row
         gdocs.append_sheet(service, SHEET_ID, car)
-    
-#"""
+
+
+
+"""
+
+
 #values = ['UF29221', 'JTEBZ29J800101448', 'FALSE', 290000, 2006, 190000, 166, 8, 'Sølv', 'Personbil', 'Automat', 'Bruktbil til salgs', 'https://www.kvdnorge.no/bilvardering?regnr=UF29221&distance=290000']
 #gdocs.append_sheet(service, SHEET_ID, values)
 
