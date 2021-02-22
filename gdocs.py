@@ -49,13 +49,10 @@ class gdocs:
         return values
 
     def append_sheet(self, service, SHEET_ID, values):
-        
         response = service.spreadsheets().values().append(spreadsheetId=SHEET_ID, range='Sheet1!A1:M1', valueInputOption='USER_ENTERED', insertDataOption='INSERT_ROWS', body={'values': [values]}).execute()
         print(response)
 
-
     def update_sheet(self, service, SHEET_ID):
-
         sheet = service.spreadsheets()
         result = sheet.values().get(spreadsheetId=SHEET_ID, range='Sheet1!A1:A100').execute() 
         values = result.get('values', [])

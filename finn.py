@@ -4,6 +4,7 @@ import re
 import csv
 from bs4 import BeautifulSoup
 import time
+import listprice
 
 # Regex expressions
 regex_get_ad_ids = r'(?:<div aria-owns="ads__unit__content__title)([\d]{9})'
@@ -63,15 +64,27 @@ def get_car_details(finn_search):
         chassisnumber = retrieve_value(regex_chassisnumber, html_ad)
 
         # Special cases
+        if registration and kilometers:
+            print(registration, kilometers)
+            try:
+                list_price = listprice.get_listprice(str(registration), str(kilometers))
+            #    print(list_price)
+            except Exception as e:
+                print('failed with exception:', e)
+                list_price = 0
+            #break
+        else:
+            registration = 0
         service = bool(re.search(regex_service, html_ad))
+        
+        
         #try:
         #    description = BeautifulSoup(re.findall(regex_description, html_ad)[0], "html5").text
         #except:
         #    description = ''
-        #link_listprice = f'https://www.kvdnorge.no/bilvardering?regnr={registration}&distance={kilometers}' if registration else ''
 
         # Add results to list
-        car_list.append([registration, chassisnumber, service, kilometers, year, price, horsepower, seats, color, taxclass, gearbox, salestype, 0, f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}'])
+        car_list.append([registration, chassisnumber, service, kilometers, year, price, list_price, horsepower, seats, color, taxclass, gearbox, salestype, f'https://www.finn.no/car/used/ad.html?finnkode={finn_id}'])
 
     # Return result
     return car_list
